@@ -1,20 +1,931 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d17"><meta name="description" content="TraceLens reconstructs production incidents from imperfect telemetry, traces service impact, and explains likely root causes."><meta property="og:type" content="website"><meta property="og:title" content="TraceLens — Incident intelligence"><meta property="og:description" content="Follow the failure. Find the cause. See the evidence."><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230d2023'/%3E%3Cpath d='M6 21h7l5-11 6 21 5-11h5' fill='none' stroke='%235be1d0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"><title>TraceLens — Incident intelligence</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#080d17;color:#e8edf6;font:13px system-ui,Segoe UI,sans-serif}.app{max-width:1450px;margin:auto;padding:22px 30px}.top,.heading,.panelhead{display:flex;justify-content:space-between;align-items:center}.top{border-bottom:1px solid #1c2940;padding-bottom:16px}.brand{font-size:19px;font-weight:800;letter-spacing:-.5px}.brand b,.eyebrow{color:#5be1d0}.sub,.muted{color:#8190a9;font-size:10px}.live,.tag{font:10px monospace;color:#72e3ad;border:1px solid #244739;padding:6px 9px;border-radius:20px}.heading{margin:22px 0 15px;align-items:end}.eyebrow{font:10px monospace;letter-spacing:1px}.heading h1{font-size:23px;margin:5px 0}.heading p{color:#8190a9;margin:0;font-size:11px}.selector{display:flex;gap:7px;align-items:center;color:#8190a9;font-size:10px}select,button{background:#111a29;color:#e8edf6;border:1px solid #26354c;padding:9px 12px;border-radius:6px;font:11px system-ui;cursor:pointer}.primary{background:#5be1d0;color:#071511;font-weight:800}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}.metric,.panel{background:linear-gradient(145deg,#0e1726,#0b121e);border:1px solid #1c2940;border-radius:10px}.metric{padding:13px 15px}.metric label{display:block;color:#8190a9;font-size:10px}.metric strong{display:block;font-size:21px;margin-top:5px}.metric small{font:10px monospace;color:#ff647c;margin-left:5px}.main{display:grid;grid-template-columns:1.7fr .9fr;gap:12px}.panel{padding:15px}.panelhead{margin-bottom:12px}.panelhead strong{font-size:12px}.tag{color:#5be1d0;background:#102625;border-radius:4px}.graph{height:235px;background:radial-gradient(ellipse,#111d2c,#0a111d);border:1px solid #17253a;border-radius:7px}.graph svg{width:100%;height:100%}.edge{fill:none;stroke:#465773;stroke-width:2;marker-end:url(#arrow)}.edge.hot{stroke:#ff647c;stroke-width:3;filter:drop-shadow(0 0 4px #ff647c66)}.edge.warm{stroke:#ffbf69;stroke-dasharray:5 4}.node rect{fill:#111d2d;stroke:#3a4b64;stroke-width:1.5;rx:8}.node.root rect{stroke:#ff647c;fill:#281522;stroke-width:2}.node text{font:10px monospace;fill:#e8edf6}.node .sub{font-size:8px;fill:#8c9bb3}.legend{display:flex;gap:14px;color:#8190a9;font-size:9px;margin-top:10px}.side{display:grid;gap:12px}.cause{border:1px solid #51313e;background:#211720;padding:12px;border-radius:8px;margin-top:10px}.causehead{display:flex;justify-content:space-between}.cause h3{font-size:12px;margin:0}.confidence{color:#ff647c;font:11px monospace}.cause p,.recommend{font-size:10px;line-height:1.6;color:#b8c2d1}.chips{display:flex;gap:6px}.chip{font:9px monospace;color:#ceb8c1;background:#2b202a;border:1px solid #493744;padding:4px 6px;border-radius:4px}.recommend{background:#11231f;border:1px solid #244839;padding:10px;border-radius:6px;margin-top:9px}.recommend b{display:block;color:#72e3ad}.explain{border:0;background:none;color:#5be1d0;padding:0}.how{display:none;color:#bac8d9;font-size:10px;line-height:1.6;margin-top:8px}.how.open{display:block}.timeline{margin-top:12px}.events{display:grid;grid-template-columns:repeat(6,1fr);padding-top:13px}.event{border-top:1px solid #2a3950;padding:10px 8px 0 0;position:relative}.event:before{content:'';position:absolute;top:-5px;width:9px;height:9px;background:#102a30;border:2px solid #5be1d0;border-radius:50%}.event.bad:before{border-color:#ff647c}.event.late:before,.event.missing:before{border-color:#ffbf69}.event time{font:9px monospace;color:#8190a9}.event b{font-size:9px;display:block;margin:5px 0}.event span{font-size:9px;color:#a0aec1}.event.missing b:after{content:' · inferred';font:8px monospace;color:#ffbf69}.bottom{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:12px}.services{display:grid;gap:8px}.service{display:grid;grid-template-columns:1fr 100px 65px;gap:10px;align-items:center;font-size:10px}.bar{height:5px;background:#1b293d;border-radius:4px}.bar i{height:100%;display:block;background:#5be1d0;border-radius:4px}.bar i.red{background:#ff647c}.bar i.amber{background:#ffbf69}.latency{text-align:right;font:9px monospace;color:#b4bfd0}.sig{padding:7px 0;border-bottom:1px solid #19263a;font-size:10px;color:#b3bed0}.sig b{color:#e8edf6}.foot{display:flex;justify-content:space-between;color:#596982;font:9px monospace;padding:15px 2px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14251f;border:1px solid #315542;color:#72e3ad;padding:11px 16px;border-radius:8px;opacity:0;transition:.2s}.toast.show{opacity:1}@media(max-width:850px){.app{padding:15px}.metrics{grid-template-columns:repeat(3,1fr)}.main,.bottom{grid-template-columns:1fr}.heading{align-items:flex-start;gap:12px;flex-direction:column}.events{grid-template-columns:repeat(3,1fr);gap:10px}.top .export{display:none}}@media(max-width:480px){.metrics{grid-template-columns:repeat(2,1fr)}.metric:last-child{grid-column:span 2}.graph{height:195px}.panel{padding:12px}}
-</style></head><body><div class="app">
-<header class="top"><div><div class="brand">◈ trace<b>lens</b></div><div class="sub">INCIDENT INTELLIGENCE · SYSTEMS THAT EXPLAIN THEMSELVES</div></div><div><span class="live">● DEMO TELEMETRY</span> <button class="export" id="export">↓ Export incident</button></div></header>
-<section class="heading"><div><div class="eyebrow">INCIDENT ROOM / INC-2847</div><h1 id="title"></h1><p id="subtitle"></p></div><div class="selector">DEMO SCENARIO <select id="scenario"><option value="db">Database pool exhaustion</option><option value="deploy">Config regression after deploy</option><option value="provider">External provider slowdown</option></select><button class="primary" id="analyze">↻ Analyze</button></div></section>
-<section class="metrics"><div class="metric"><label>ROOT CAUSE CONFIDENCE</label><strong id="confidence"></strong></div><div class="metric"><label>AFFECTED REQUESTS</label><strong id="affected"></strong></div><div class="metric"><label>IMPACTED SERVICES</label><strong id="impacted"></strong></div><div class="metric"><label>TIME TO FIRST SIGNAL</label><strong id="first"></strong></div><div class="metric"><label>TELEMETRY COMPLETENESS</label><strong id="complete"></strong></div></section>
-<div class="main"><section class="panel"><div class="panelhead"><strong>Service dependency map <span class="tag">CAUSAL PATH</span></strong><span class="muted">6 nodes · 5 edges · direction of impact →</span></div><div class="graph"><svg viewBox="0 0 760 236" role="img" aria-label="Incident propagation across service dependencies"><defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#53627a"/></marker></defs><path class="edge hot" d="M154 118 C190 118 190 63 225 63"/><path class="edge hot" d="M154 118 C190 118 190 174 225 174"/><path class="edge warm" d="M365 63 C411 63 410 93 451 93"/><path class="edge hot" d="M365 174 C411 174 410 132 451 132"/><path class="edge warm" d="M591 112 C621 112 623 112 648 112"/><g class="node root" id="origin" transform="translate(28 94)"><rect width="126" height="48"/><text x="13" y="19">postgres-primary</text><text class="sub" id="originSub" x="13" y="36"></text></g><g class="node" transform="translate(225 39)"><rect width="140" height="48"/><text x="13" y="19">checkout-api</text><text class="sub" x="13" y="36">P99 4.8s · ERR 18%</text></g><g class="node" transform="translate(225 150)"><rect width="140" height="48"/><text x="13" y="19">cart-service</text><text class="sub" x="13" y="36">P99 2.1s · ERR 9%</text></g><g class="node" transform="translate(451 88)"><rect width="140" height="48"/><text x="13" y="19">payment-orch.</text><text class="sub" x="13" y="36">TIMEOUTS · 12%</text></g><g class="node" transform="translate(648 88)"><rect width="96" height="48"/><text x="13" y="19">gateway</text><text class="sub" x="13" y="36">RETRY 3×</text></g><g class="node" transform="translate(451 176)"><rect width="140" height="42"/><text x="13" y="18">catalog-cache</text><text class="sub" x="13" y="33">HEALTHY · CONTROL</text></g></svg></div><div class="legend"><span style="color:#ff647c">●</span> Likely origin <span style="color:#ffbf69">●</span> Downstream impact <span style="color:#72e3ad">●</span> Healthy control <span style="margin-left:auto">solid = correlated · dashed = inferred</span></div></section>
-<aside class="side"><section class="panel"><div class="panelhead"><strong>Most likely root cause</strong><button class="explain" id="explain">How we know ↗</button></div><div class="cause"><div class="causehead"><h3 id="cause"></h3><span class="confidence" id="causeConf"></span></div><p id="causeText"></p><div class="chips"><span class="chip">TEMPORAL PRECEDENCE</span><span class="chip">DEPENDENCY MATCH</span><span class="chip">CONTROL HEALTHY</span></div></div><div class="recommend"><b>↳ RECOMMENDED ACTION</b><span id="recommend"></span></div><div id="how" class="how">TraceLens ranks hypotheses by temporal order, dependency reachability, metric co-movement, and healthy control services. Missing spans are inferred from adjacent timestamps and dependency edges; late events are time-corrected before scoring. Explainable heuristic, not a black-box model.</div></section></aside></div>
-<section class="panel timeline"><div class="panelhead"><strong>What happened <span class="tag">EVENT RECONSTRUCTION</span></strong><button id="gaps">◉ Hide missing telemetry</button></div><div id="events" class="events"></div></section>
-<div class="bottom"><section class="panel"><div class="panelhead"><strong>Service health at incident peak</strong><span class="muted">p99 latency · incident window</span></div><div id="services" class="services"></div></section><section class="panel"><div class="panelhead"><strong>Evidence & signal quality</strong><span class="tag">4 SIGNALS</span></div><div id="signals"></div></section></div>
-<footer class="foot"><span>TRACELENS · EXPLAINABLE INCIDENT ANALYSIS</span><span>ALL DATA SYNTHETIC · OFFLINE DEMO</span><span>BUILT FOR THE INVISIBLE FAILURE PROBLEM</span></footer></div><div id="toast" class="toast">Incident report downloaded</div>
-<script>
-const data={
-db:{title:'Checkout latency cascade',subtitle:'Detected 14:32:08 UTC · Production · us-east-1 · investigating',confidence:94,affected:'18.4k',impacted:'4 of 9',first:'17 sec',complete:'82%',origin:'postgres-primary',originSub:'POOL 100% · SATURATED',cause:'Connection pool saturation',text:'Postgres active connections hit the 120-connection ceiling 17 seconds before checkout latency rose. Queue wait climbed first; downstream timeouts followed the dependency graph.',recommend:'Pause new checkout workers, raise the pool ceiling to 180, then drain the connection queue. Revert if database CPU exceeds 85%.',events:[['14:31:42','Deploy','checkout-api v2.18.4 · no code diff in DB layer','ok'],['14:31:51','Pool pressure','Postgres connections: 94 → 120 / 120','bad'],['14:31:59','Queue growth','DB wait queue begins growing · span missing','missing'],['14:32:08','Latency spike','checkout-api p99: 240ms → 4.8s','bad'],['14:32:21','Retry storm','payment-orch. retries double · event arrived +8s late','late'],['14:32:48','User impact','18.4k requests affected · 6.2% checkout failures','bad']],services:[['postgres-primary','Pool 100%','red',100],['checkout-api','4.8s','red',92],['cart-service','2.1s','amber',57],['payment-orch.','1.7s','amber',48],['api-gateway','620ms','amber',32],['catalog-cache','42ms','',10]],signals:['<b>17 sec lead:</b> pool saturation preceded the first user-facing alarm.','<b>Dependency-consistent:</b> all 4 degraded services depend on the database.','<b>Negative control:</b> catalog-cache stayed healthy at 42ms.','<b>Telemetry gaps:</b> 1 missing DB span inferred; 1 event timestamp corrected.']},
-deploy:{title:'Config regression after deploy',subtitle:'Detected 09:14:32 UTC · Production · eu-west-1 · investigating',confidence:91,affected:'9.7k',impacted:'3 of 9',first:'23 sec',complete:'91%',origin:'config-v41 canary',originSub:'CANARY · 14% ERRORS',cause:'Connection timeout misconfiguration',text:'A config-only release changed upstream timeout from 2.0s to 250ms. The first elevated timeout rate appears 23 seconds after rollout, isolated to the new canary cohort.',recommend:'Roll back config v41 for the canary cohort. Keep 10% traffic pinned to the previous version while confirming timeout and error rates return to baseline.',events:[['09:13:50','Config deploy','checkout-api config v41 · timeout changed','ok'],['09:14:04','Canary begins','10% traffic shifted to new config','ok'],['09:14:13','Timeouts rise','upstream timeout errors: 0.2% → 14%','bad'],['09:14:32','Latency spike','checkout-api p99: 180ms → 2.6s','bad'],['09:14:49','Retry fan-out','gateway retries rise · 1 trace missing','missing'],['09:15:21','User impact','9.7k requests affected · canary isolated','late']],services:[['config-v41 canary','14% errors','red',100],['checkout-api','2.6s','red',77],['api-gateway','910ms','amber',45],['payment-orch.','330ms','',20],['postgres-primary','38% pool','',14],['catalog-cache','44ms','',10]],signals:['<b>Change precedes failure:</b> only the new config cohort degrades.','<b>Causal boundary:</b> previous version remains within baseline.','<b>Controls healthy:</b> database and cache show no correlated change.','<b>Telemetry gaps:</b> one retry trace is missing; cohort tags remain intact.']},
-provider:{title:'Search-to-checkout slowdown',subtitle:'Detected 18:07:11 UTC · Production · ap-south-1 · investigating',confidence:88,affected:'6.2k',impacted:'3 of 9',first:'31 sec',complete:'76%',origin:'tax-provider',originSub:'P99 3.4s · DEGRADED',cause:'External tax provider latency',text:'Tax provider p99 climbed from 180ms to 3.4s before checkout latency. Internal database, cache, and CPU stayed at baseline; delayed provider webhook confirms the same window.',recommend:'Enable the cached tax quote fallback for new carts and cap provider calls at 800ms. Reconcile quotes after provider latency returns below 400ms.',events:[['18:06:20','Provider baseline','tax-provider p99: 180ms','ok'],['18:06:37','External latency','provider p99 rises to 3.4s','bad'],['18:06:52','Webhook delay','provider update late by 11s','late'],['18:07:11','Checkout slow','checkout-api p99: 3.1s · span missing','missing'],['18:07:26','Fallback disabled','tax quote fallback unavailable in region','bad'],['18:08:04','User impact','6.2k requests affected · 2.1% abandon','bad']],services:[['tax-provider','3.4s','red',100],['checkout-api','3.1s','red',89],['search-api','1.2s','amber',45],['api-gateway','530ms','amber',31],['postgres-primary','42% pool','',16],['catalog-cache','39ms','',9]],signals:['<b>External lead:</b> provider latency rises 34 sec before internal impact.','<b>Path match:</b> degraded services call tax-provider synchronously.','<b>Controls healthy:</b> database and cache remain at baseline.','<b>Telemetry gaps:</b> 1 missing checkout span; webhook time corrected.']}};
-let showGaps=true;const $=x=>document.getElementById(x);function render(){let d=data[$('scenario').value];$('title').textContent=d.title;$('subtitle').textContent=d.subtitle;$('confidence').innerHTML=d.confidence+'<small>% · HIGH</small>';$('affected').innerHTML=d.affected+'<small> / 6 min</small>';$('impacted').innerHTML=d.impacted;$('first').innerHTML=d.first;$('complete').innerHTML=d.complete+'<small> · gaps inferred</small>';$('origin').querySelector('text').textContent=d.origin;$('originSub').textContent=d.originSub;$('cause').textContent=d.cause;$('causeConf').textContent=d.confidence+'% confidence';$('causeText').textContent=d.text;$('recommend').textContent=d.recommend;$('events').innerHTML=d.events.map(e=>`<div class="event ${e[3]}" ${e[3]==='missing'&&!showGaps?'style="display:none"':''}><time>${e[0]} UTC</time><b>${e[1]}</b><span>${e[2]}</span></div>`).join('');$('services').innerHTML=d.services.map(s=>`<div class="service"><span>${s[0]}</span><div class="bar"><i class="${s[2]}" style="width:${s[3]}%"></i></div><span class="latency">${s[1]}</span></div>`).join('');$('signals').innerHTML=d.signals.map(s=>`<div class="sig">◌ &nbsp;${s}</div>`).join('')};$('scenario').onchange=render;$('analyze').onclick=()=>{render();$('analyze').textContent='✓ Analyzed';setTimeout(()=>$('analyze').textContent='↻ Analyze',900)};$('explain').onclick=()=>$('how').classList.toggle('open');$('gaps').onclick=()=>{showGaps=!showGaps;$('gaps').textContent=showGaps?'◉ Hide missing telemetry':'◉ Show missing telemetry';render()};$('export').onclick=()=>{let d=data[$('scenario').value],s=`TRACELENS INCIDENT REPORT\n${d.title}\n${d.subtitle}\n\nLIKELY ROOT CAUSE (${d.confidence}% confidence)\n${d.cause}\n${d.text}\n\nRECOMMENDED ACTION\n${d.recommend}\n\nEVIDENCE\n${d.signals.map(x=>'- '+x.replace(/<[^>]+>/g,'')).join('\n')}\n\nSynthetic offline demo report.`;let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/plain'}));a.download='tracelens-incident-report.txt';a.click();$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1600)};render();
-</script></body></html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#080d17" />
+    <meta name="description" content="TraceLens reconstructs production incidents from imperfect telemetry, traces service impact, and explains likely root causes." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="TraceLens — Incident intelligence" />
+    <meta property="og:description" content="Follow the failure. Find the cause. See the evidence." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%230d2023'/%3E%3Cpath d='M6 21h7l5-11 6 21 5-11h5' fill='none' stroke='%235be1d0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <title>TraceLens — Incident intelligence</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #080d17;
+            color: #e8edf6;
+            font:
+                13px system-ui,
+                Segoe UI,
+                sans-serif;
+        }
+
+        .app {
+            max-width: 1450px;
+            margin: auto;
+            padding: 22px 30px;
+        }
+
+        .top,
+        .heading,
+        .panelhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top {
+            border-bottom: 1px solid #1c2940;
+            padding-bottom: 16px;
+        }
+
+        .brand {
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand b,
+        .eyebrow {
+            color: #5be1d0;
+        }
+
+        .sub,
+        .muted {
+            color: #8190a9;
+            font-size: 10px;
+        }
+
+        .live,
+        .tag {
+            font: 10px monospace;
+            color: #72e3ad;
+            border: 1px solid #244739;
+            padding: 6px 9px;
+            border-radius: 20px;
+        }
+
+        .heading {
+            margin: 22px 0 15px;
+            align-items: end;
+        }
+
+        .eyebrow {
+            font: 10px monospace;
+            letter-spacing: 1px;
+        }
+
+        .heading h1 {
+            font-size: 23px;
+            margin: 5px 0;
+        }
+
+        .heading p {
+            color: #8190a9;
+            margin: 0;
+            font-size: 11px;
+        }
+
+        .selector {
+            display: flex;
+            gap: 7px;
+            align-items: center;
+            color: #8190a9;
+            font-size: 10px;
+        }
+
+        select,
+        button {
+            background: #111a29;
+            color: #e8edf6;
+            border: 1px solid #26354c;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font: 11px system-ui;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #5be1d0;
+            color: #071511;
+            font-weight: 800;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .metric,
+        .panel {
+            background: linear-gradient(145deg, #0e1726, #0b121e);
+            border: 1px solid #1c2940;
+            border-radius: 10px;
+        }
+
+        .metric {
+            padding: 13px 15px;
+        }
+
+        .metric label {
+            display: block;
+            color: #8190a9;
+            font-size: 10px;
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 21px;
+            margin-top: 5px;
+        }
+
+        .metric small {
+            font: 10px monospace;
+            color: #ff647c;
+            margin-left: 5px;
+        }
+
+        .main {
+            display: grid;
+            grid-template-columns: 1.7fr 0.9fr;
+            gap: 12px;
+        }
+
+        .panel {
+            padding: 15px;
+        }
+
+        .panelhead {
+            margin-bottom: 12px;
+        }
+
+        .panelhead strong {
+            font-size: 12px;
+        }
+
+        .tag {
+            color: #5be1d0;
+            background: #102625;
+            border-radius: 4px;
+        }
+
+        .graph {
+            height: 235px;
+            background: radial-gradient(ellipse, #111d2c, #0a111d);
+            border: 1px solid #17253a;
+            border-radius: 7px;
+        }
+
+        .graph svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .edge {
+            fill: none;
+            stroke: #465773;
+            stroke-width: 2;
+            marker-end: url(#arrow);
+        }
+
+        .edge.hot {
+            stroke: #ff647c;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 4px #ff647c66);
+        }
+
+        .edge.warm {
+            stroke: #ffbf69;
+            stroke-dasharray: 5 4;
+        }
+
+        .node rect {
+            fill: #111d2d;
+            stroke: #3a4b64;
+            stroke-width: 1.5;
+            rx: 8;
+        }
+
+        .node.root rect {
+            stroke: #ff647c;
+            fill: #281522;
+            stroke-width: 2;
+        }
+
+        .node text {
+            font: 10px monospace;
+            fill: #e8edf6;
+        }
+
+        .node .sub {
+            font-size: 8px;
+            fill: #8c9bb3;
+        }
+
+        .legend {
+            display: flex;
+            gap: 14px;
+            color: #8190a9;
+            font-size: 9px;
+            margin-top: 10px;
+        }
+
+        .side {
+            display: grid;
+            gap: 12px;
+        }
+
+        .cause {
+            border: 1px solid #51313e;
+            background: #211720;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .causehead {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cause h3 {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .confidence {
+            color: #ff647c;
+            font: 11px monospace;
+        }
+
+        .cause p,
+        .recommend {
+            font-size: 10px;
+            line-height: 1.6;
+            color: #b8c2d1;
+        }
+
+        .chips {
+            display: flex;
+            gap: 6px;
+        }
+
+        .chip {
+            font: 9px monospace;
+            color: #ceb8c1;
+            background: #2b202a;
+            border: 1px solid #493744;
+            padding: 4px 6px;
+            border-radius: 4px;
+        }
+
+        .recommend {
+            background: #11231f;
+            border: 1px solid #244839;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 9px;
+        }
+
+        .recommend b {
+            display: block;
+            color: #72e3ad;
+        }
+
+        .explain {
+            border: 0;
+            background: none;
+            color: #5be1d0;
+            padding: 0;
+        }
+
+        .how {
+            display: none;
+            color: #bac8d9;
+            font-size: 10px;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .how.open {
+            display: block;
+        }
+
+        .timeline {
+            margin-top: 12px;
+        }
+
+        .events {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            padding-top: 13px;
+        }
+
+        .event {
+            border-top: 1px solid #2a3950;
+            padding: 10px 8px 0 0;
+            position: relative;
+        }
+
+        .event:before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            width: 9px;
+            height: 9px;
+            background: #102a30;
+            border: 2px solid #5be1d0;
+            border-radius: 50%;
+        }
+
+        .event.bad:before {
+            border-color: #ff647c;
+        }
+
+        .event.late:before,
+        .event.missing:before {
+            border-color: #ffbf69;
+        }
+
+        .event time {
+            font: 9px monospace;
+            color: #8190a9;
+        }
+
+        .event b {
+            font-size: 9px;
+            display: block;
+            margin: 5px 0;
+        }
+
+        .event span {
+            font-size: 9px;
+            color: #a0aec1;
+        }
+
+        .event.missing b:after {
+            content: " · inferred";
+            font: 8px monospace;
+            color: #ffbf69;
+        }
+
+        .bottom {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .services {
+            display: grid;
+            gap: 8px;
+        }
+
+        .service {
+            display: grid;
+            grid-template-columns: 1fr 100px 65px;
+            gap: 10px;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        .bar {
+            height: 5px;
+            background: #1b293d;
+            border-radius: 4px;
+        }
+
+        .bar i {
+            height: 100%;
+            display: block;
+            background: #5be1d0;
+            border-radius: 4px;
+        }
+
+        .bar i.red {
+            background: #ff647c;
+        }
+
+        .bar i.amber {
+            background: #ffbf69;
+        }
+
+        .latency {
+            text-align: right;
+            font: 9px monospace;
+            color: #b4bfd0;
+        }
+
+        .sig {
+            padding: 7px 0;
+            border-bottom: 1px solid #19263a;
+            font-size: 10px;
+            color: #b3bed0;
+        }
+
+        .sig b {
+            color: #e8edf6;
+        }
+
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            color: #596982;
+            font: 9px monospace;
+            padding: 15px 2px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #14251f;
+            border: 1px solid #315542;
+            color: #72e3ad;
+            padding: 11px 16px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 850px) {
+            .app {
+                padding: 15px;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .main,
+            .bottom {
+                grid-template-columns: 1fr;
+            }
+
+            .heading {
+                align-items: flex-start;
+                gap: 12px;
+                flex-direction: column;
+            }
+
+            .events {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .top .export {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metric:last-child {
+                grid-column: span 2;
+            }
+
+            .graph {
+                height: 195px;
+            }
+
+            .panel {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="top">
+            <div>
+                <div class="brand">◈ trace<b>lens</b></div>
+                <div class="sub">
+                    INCIDENT INTELLIGENCE · SYSTEMS THAT EXPLAIN THEMSELVES
+                </div>
+            </div>
+            <div>
+                <span class="live">● DEMO TELEMETRY</span>
+                <button class="export" id="export">↓ Export incident</button>
+            </div>
+        </header>
+        <section class="heading">
+            <div>
+                <div class="eyebrow">INCIDENT ROOM / INC-2847</div>
+                <h1 id="title"></h1>
+                <p id="subtitle"></p>
+            </div>
+            <div class="selector">
+                DEMO SCENARIO
+                <select id="scenario">
+                    <option value="db">Database pool exhaustion</option>
+                    <option value="deploy">Config regression after deploy</option>
+                    <option value="provider">External provider slowdown</option>
+                </select><button class="primary" id="analyze">↻ Analyze</button>
+            </div>
+        </section>
+        <section class="metrics">
+            <div class="metric">
+                <label>ROOT CAUSE CONFIDENCE</label><strong id="confidence"></strong>
+            </div>
+            <div class="metric">
+                <label>AFFECTED REQUESTS</label><strong id="affected"></strong>
+            </div>
+            <div class="metric">
+                <label>IMPACTED SERVICES</label><strong id="impacted"></strong>
+            </div>
+            <div class="metric">
+                <label>TIME TO FIRST SIGNAL</label><strong id="first"></strong>
+            </div>
+            <div class="metric">
+                <label>TELEMETRY COMPLETENESS</label><strong id="complete"></strong>
+            </div>
+        </section>
+        <div class="main">
+            <section class="panel">
+                <div class="panelhead">
+                    <strong>Service dependency map
+                        <span class="tag">CAUSAL PATH</span></strong><span class="muted">6 nodes · 5 edges · direction of impact →</span>
+                </div>
+                <div class="graph">
+                    <svg viewBox="0 0 760 236" role="img" aria-label="Incident propagation across service dependencies">
+                        <defs>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                <path d="M0 0L10 5L0 10z" fill="#53627a" />
+                            </marker>
+                        </defs>
+                        <path class="edge hot" d="M154 118 C190 118 190 63 225 63" />
+                        <path class="edge hot" d="M154 118 C190 118 190 174 225 174" />
+                        <path class="edge warm" d="M365 63 C411 63 410 93 451 93" />
+                        <path class="edge hot" d="M365 174 C411 174 410 132 451 132" />
+                        <path class="edge warm" d="M591 112 C621 112 623 112 648 112" />
+                        <g class="node root" id="origin" transform="translate(28 94)">
+                            <rect width="126" height="48" />
+                            <text x="13" y="19">postgres-primary</text>
+                            <text class="sub" id="originSub" x="13" y="36"></text>
+                        </g>
+                        <g class="node" transform="translate(225 39)">
+                            <rect width="140" height="48" />
+                            <text x="13" y="19">checkout-api</text>
+                            <text class="sub" x="13" y="36">P99 4.8s · ERR 18%</text>
+                        </g>
+                        <g class="node" transform="translate(225 150)">
+                            <rect width="140" height="48" />
+                            <text x="13" y="19">cart-service</text>
+                            <text class="sub" x="13" y="36">P99 2.1s · ERR 9%</text>
+                        </g>
+                        <g class="node" transform="translate(451 88)">
+                            <rect width="140" height="48" />
+                            <text x="13" y="19">payment-orch.</text>
+                            <text class="sub" x="13" y="36">TIMEOUTS · 12%</text>
+                        </g>
+                        <g class="node" transform="translate(648 88)">
+                            <rect width="96" height="48" />
+                            <text x="13" y="19">gateway</text>
+                            <text class="sub" x="13" y="36">RETRY 3×</text>
+                        </g>
+                        <g class="node" transform="translate(451 176)">
+                            <rect width="140" height="42" />
+                            <text x="13" y="18">catalog-cache</text>
+                            <text class="sub" x="13" y="33">HEALTHY · CONTROL</text>
+                        </g>
+                    </svg>
+                </div>
+                <div class="legend">
+                    <span style="color: #ff647c">●</span> Likely origin
+                    <span style="color: #ffbf69">●</span> Downstream impact
+                    <span style="color: #72e3ad">●</span> Healthy control
+                    <span style="margin-left: auto">solid = correlated · dashed = inferred</span>
+                </div>
+            </section>
+            <aside class="side">
+                <section class="panel">
+                    <div class="panelhead">
+                        <strong>Most likely root cause</strong><button class="explain" id="explain">How we know ↗</button>
+                    </div>
+                    <div class="cause">
+                        <div class="causehead">
+                            <h3 id="cause"></h3>
+                            <span class="confidence" id="causeConf"></span>
+                        </div>
+                        <p id="causeText"></p>
+                        <div class="chips">
+                            <span class="chip">TEMPORAL PRECEDENCE</span><span class="chip">DEPENDENCY MATCH</span><span class="chip">CONTROL HEALTHY</span>
+                        </div>
+                    </div>
+                    <div class="recommend">
+                        <b>↳ RECOMMENDED ACTION</b><span id="recommend"></span>
+                    </div>
+                    <div id="how" class="how">
+                        TraceLens ranks hypotheses by temporal order, dependency
+                        reachability, metric co-movement, and healthy control services.
+                        Missing spans are inferred from adjacent timestamps and dependency
+                        edges; late events are time-corrected before scoring. Explainable
+                        heuristic, not a black-box model.
+                    </div>
+                </section>
+            </aside>
+        </div>
+        <section class="panel timeline">
+            <div class="panelhead">
+                <strong>What happened <span class="tag">EVENT RECONSTRUCTION</span></strong><button id="gaps">◉ Hide missing telemetry</button>
+            </div>
+            <div id="events" class="events"></div>
+        </section>
+        <div class="bottom">
+            <section class="panel">
+                <div class="panelhead">
+                    <strong>Service health at incident peak</strong><span class="muted">p99 latency · incident window</span>
+                </div>
+                <div id="services" class="services"></div>
+            </section>
+            <section class="panel">
+                <div class="panelhead">
+                    <strong>Evidence & signal quality</strong><span class="tag">4 SIGNALS</span>
+                </div>
+                <div id="signals"></div>
+            </section>
+        </div>
+        <footer class="foot">
+            <span>TRACELENS · EXPLAINABLE INCIDENT ANALYSIS</span><span>ALL DATA SYNTHETIC · OFFLINE DEMO</span><span>BUILT FOR THE INVISIBLE FAILURE PROBLEM</span>
+        </footer>
+    </div>
+    <div id="toast" class="toast">Incident report downloaded</div>
+    <script>
+        const data = {
+            db: {
+                title: "Checkout latency cascade",
+                subtitle: "Detected 14:32:08 UTC · Production · us-east-1 · investigating",
+                confidence: 94,
+                affected: "18.4k",
+                impacted: "4 of 9",
+                first: "17 sec",
+                complete: "82%",
+                origin: "postgres-primary",
+                originSub: "POOL 100% · SATURATED",
+                cause: "Connection pool saturation",
+                text: "Postgres active connections hit the 120-connection ceiling 17 seconds before checkout latency rose. Queue wait climbed first; downstream timeouts followed the dependency graph.",
+                recommend: "Pause new checkout workers, raise the pool ceiling to 180, then drain the connection queue. Revert if database CPU exceeds 85%.",
+                events: [
+                    [
+                        "14:31:42",
+                        "Deploy",
+                        "checkout-api v2.18.4 · no code diff in DB layer",
+                        "ok",
+                    ],
+                    [
+                        "14:31:51",
+                        "Pool pressure",
+                        "Postgres connections: 94 → 120 / 120",
+                        "bad",
+                    ],
+                    [
+                        "14:31:59",
+                        "Queue growth",
+                        "DB wait queue begins growing · span missing",
+                        "missing",
+                    ],
+                    [
+                        "14:32:08",
+                        "Latency spike",
+                        "checkout-api p99: 240ms → 4.8s",
+                        "bad",
+                    ],
+                    [
+                        "14:32:21",
+                        "Retry storm",
+                        "payment-orch. retries double · event arrived +8s late",
+                        "late",
+                    ],
+                    [
+                        "14:32:48",
+                        "User impact",
+                        "18.4k requests affected · 6.2% checkout failures",
+                        "bad",
+                    ],
+                ],
+                services: [
+                    ["postgres-primary", "Pool 100%", "red", 100],
+                    ["checkout-api", "4.8s", "red", 92],
+                    ["cart-service", "2.1s", "amber", 57],
+                    ["payment-orch.", "1.7s", "amber", 48],
+                    ["api-gateway", "620ms", "amber", 32],
+                    ["catalog-cache", "42ms", "", 10],
+                ],
+                signals: [
+                    "<b>17 sec lead:</b> pool saturation preceded the first user-facing alarm.",
+                    "<b>Dependency-consistent:</b> all 4 degraded services depend on the database.",
+                    "<b>Negative control:</b> catalog-cache stayed healthy at 42ms.",
+                    "<b>Telemetry gaps:</b> 1 missing DB span inferred; 1 event timestamp corrected.",
+                ],
+            },
+            deploy: {
+                title: "Config regression after deploy",
+                subtitle: "Detected 09:14:32 UTC · Production · eu-west-1 · investigating",
+                confidence: 91,
+                affected: "9.7k",
+                impacted: "3 of 9",
+                first: "23 sec",
+                complete: "91%",
+                origin: "config-v41 canary",
+                originSub: "CANARY · 14% ERRORS",
+                cause: "Connection timeout misconfiguration",
+                text: "A config-only release changed upstream timeout from 2.0s to 250ms. The first elevated timeout rate appears 23 seconds after rollout, isolated to the new canary cohort.",
+                recommend: "Roll back config v41 for the canary cohort. Keep 10% traffic pinned to the previous version while confirming timeout and error rates return to baseline.",
+                events: [
+                    [
+                        "09:13:50",
+                        "Config deploy",
+                        "checkout-api config v41 · timeout changed",
+                        "ok",
+                    ],
+                    [
+                        "09:14:04",
+                        "Canary begins",
+                        "10% traffic shifted to new config",
+                        "ok",
+                    ],
+                    [
+                        "09:14:13",
+                        "Timeouts rise",
+                        "upstream timeout errors: 0.2% → 14%",
+                        "bad",
+                    ],
+                    [
+                        "09:14:32",
+                        "Latency spike",
+                        "checkout-api p99: 180ms → 2.6s",
+                        "bad",
+                    ],
+                    [
+                        "09:14:49",
+                        "Retry fan-out",
+                        "gateway retries rise · 1 trace missing",
+                        "missing",
+                    ],
+                    [
+                        "09:15:21",
+                        "User impact",
+                        "9.7k requests affected · canary isolated",
+                        "late",
+                    ],
+                ],
+                services: [
+                    ["config-v41 canary", "14% errors", "red", 100],
+                    ["checkout-api", "2.6s", "red", 77],
+                    ["api-gateway", "910ms", "amber", 45],
+                    ["payment-orch.", "330ms", "", 20],
+                    ["postgres-primary", "38% pool", "", 14],
+                    ["catalog-cache", "44ms", "", 10],
+                ],
+                signals: [
+                    "<b>Change precedes failure:</b> only the new config cohort degrades.",
+                    "<b>Causal boundary:</b> previous version remains within baseline.",
+                    "<b>Controls healthy:</b> database and cache show no correlated change.",
+                    "<b>Telemetry gaps:</b> one retry trace is missing; cohort tags remain intact.",
+                ],
+            },
+            provider: {
+                title: "Search-to-checkout slowdown",
+                subtitle: "Detected 18:07:11 UTC · Production · ap-south-1 · investigating",
+                confidence: 88,
+                affected: "6.2k",
+                impacted: "3 of 9",
+                first: "31 sec",
+                complete: "76%",
+                origin: "tax-provider",
+                originSub: "P99 3.4s · DEGRADED",
+                cause: "External tax provider latency",
+                text: "Tax provider p99 climbed from 180ms to 3.4s before checkout latency. Internal database, cache, and CPU stayed at baseline; delayed provider webhook confirms the same window.",
+                recommend: "Enable the cached tax quote fallback for new carts and cap provider calls at 800ms. Reconcile quotes after provider latency returns below 400ms.",
+                events: [
+                    ["18:06:20", "Provider baseline", "tax-provider p99: 180ms", "ok"],
+                    [
+                        "18:06:37",
+                        "External latency",
+                        "provider p99 rises to 3.4s",
+                        "bad",
+                    ],
+                    [
+                        "18:06:52",
+                        "Webhook delay",
+                        "provider update late by 11s",
+                        "late",
+                    ],
+                    [
+                        "18:07:11",
+                        "Checkout slow",
+                        "checkout-api p99: 3.1s · span missing",
+                        "missing",
+                    ],
+                    [
+                        "18:07:26",
+                        "Fallback disabled",
+                        "tax quote fallback unavailable in region",
+                        "bad",
+                    ],
+                    [
+                        "18:08:04",
+                        "User impact",
+                        "6.2k requests affected · 2.1% abandon",
+                        "bad",
+                    ],
+                ],
+                services: [
+                    ["tax-provider", "3.4s", "red", 100],
+                    ["checkout-api", "3.1s", "red", 89],
+                    ["search-api", "1.2s", "amber", 45],
+                    ["api-gateway", "530ms", "amber", 31],
+                    ["postgres-primary", "42% pool", "", 16],
+                    ["catalog-cache", "39ms", "", 9],
+                ],
+                signals: [
+                    "<b>External lead:</b> provider latency rises 34 sec before internal impact.",
+                    "<b>Path match:</b> degraded services call tax-provider synchronously.",
+                    "<b>Controls healthy:</b> database and cache remain at baseline.",
+                    "<b>Telemetry gaps:</b> 1 missing checkout span; webhook time corrected.",
+                ],
+            },
+        };
+        let showGaps = true;
+        const $ = (x) => document.getElementById(x);
+
+        function render() {
+            let d = data[$("scenario").value];
+            $("title").textContent = d.title;
+            $("subtitle").textContent = d.subtitle;
+            $("confidence").innerHTML = d.confidence + "<small>% · HIGH</small>";
+            $("affected").innerHTML = d.affected + "<small> / 6 min</small>";
+            $("impacted").innerHTML = d.impacted;
+            $("first").innerHTML = d.first;
+            $("complete").innerHTML =
+                d.complete + "<small> · gaps inferred</small>";
+            $("origin").querySelector("text").textContent = d.origin;
+            $("originSub").textContent = d.originSub;
+            $("cause").textContent = d.cause;
+            $("causeConf").textContent = d.confidence + "% confidence";
+            $("causeText").textContent = d.text;
+            $("recommend").textContent = d.recommend;
+            $("events").innerHTML = d.events
+                .map(
+                    (e) =>
+                    `<div class="event ${e[3]}" ${e[3] === "missing" && !showGaps ? 'style="display:none"' : ""}><time>${e[0]} UTC</time><b>${e[1]}</b><span>${e[2]}</span></div>`,
+                )
+                .join("");
+            $("services").innerHTML = d.services
+                .map(
+                    (s) =>
+                    `<div class="service"><span>${s[0]}</span><div class="bar"><i class="${s[2]}" style="width:${s[3]}%"></i></div><span class="latency">${s[1]}</span></div>`,
+                )
+                .join("");
+            $("signals").innerHTML = d.signals
+                .map((s) => `<div class="sig">◌ &nbsp;${s}</div>`)
+                .join("");
+        }
+        $("scenario").onchange = render;
+        $("analyze").onclick = () => {
+            render();
+            $("analyze").textContent = "✓ Analyzed";
+            setTimeout(() => ($("analyze").textContent = "↻ Analyze"), 900);
+        };
+        $("explain").onclick = () => $("how").classList.toggle("open");
+        $("gaps").onclick = () => {
+            showGaps = !showGaps;
+            $("gaps").textContent = showGaps ?
+                "◉ Hide missing telemetry" :
+                "◉ Show missing telemetry";
+            render();
+        };
+        $("export").onclick = () => {
+            let d = data[$("scenario").value],
+                s = `TRACELENS INCIDENT REPORT\n${d.title}\n${d.subtitle}\n\nLIKELY ROOT CAUSE (${d.confidence}% confidence)\n${d.cause}\n${d.text}\n\nRECOMMENDED ACTION\n${d.recommend}\n\nEVIDENCE\n${d.signals.map((x) => "- " + x.replace(/<[^>]+>/g, "")).join("\n")}\n\nSynthetic offline demo report.`;
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([s], {
+                type: "text/plain"
+            }));
+            a.download = "tracelens-incident-report.txt";
+            a.click();
+            $("toast").classList.add("show");
+            setTimeout(() => $("toast").classList.remove("show"), 1600);
+        };
+        render();
+    </script>
+</body>
+
+</html>
